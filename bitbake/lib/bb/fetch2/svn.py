@@ -71,7 +71,12 @@ class Svn(FetchMethod):
         command is "fetch", "update", "info"
         """
 
-        proto = ud.parm.get('proto', 'svn')
+        proto = ud.parm.get('protocol', 'svn')
+
+        if ud.parm.get('proto') is not None:
+            logger.warn('Update %s recipe to use "protocol" not "proto".', d.getVar('PN', True))
+            # Use proto value for now
+            proto =  ud.parm.get('proto')
 
         svn_rsh = None
         if proto == "svn+ssh" and "rsh" in ud.parm:
