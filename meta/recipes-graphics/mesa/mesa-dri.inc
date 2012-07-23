@@ -1,5 +1,5 @@
 PROTO_DEPS += "dri2proto"
-LIB_DEPS += "libdrm expat"
+LIB_DEPS += "libdrm expat udev"
 
 # most of our targets do not have DRI so will use mesa-xlib
 DEFAULT_PREFERENCE = "-1"
@@ -8,7 +8,13 @@ DRIDRIVERS = "swrast"
 DRIDRIVERS_append_x86 = ",i915,i965"
 DRIDRIVERS_append_x86-64 = ",i915,i965"
 
-EXTRA_OECONF += "--with-driver=dri --disable-egl --disable-gallium --without-gallium-drivers --with-dri-drivers=${DRIDRIVERS}"
+EGL_PLATFORMS  = "drm"
+EGL_PLATFORMS .="${@base_contains('DISTRO_FEATURES', 'x11', ',x11', '', d)}"
+
+EXTRA_OECONF += "--disable-gallium --without-gallium-drivers"
+EXTRA_OECONF += "--enable-dri --with-dri-drivers=${DRIDRIVERS}"
+EXTRA_OECONF += "${@base_contains('DISTRO_FEATURES', 'opengles2', '--enable-gles2', '', d)}"
+EXTRA_OECONF += "--enable-egl --with-egl-platforms=${EGL_PLATFORMS} --enable-gbm --enable-shared-glapi"
 
 python populate_packages_prepend() {
 	import os.path

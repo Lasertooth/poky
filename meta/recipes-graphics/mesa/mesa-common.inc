@@ -17,11 +17,13 @@ PE = "2"
 
 
 PROTO_DEPS = "xf86driproto glproto"
-LIB_DEPS = "virtual/libx11 libxext libxxf86vm libxdamage libxfixes libxml2-native"
+LIB_DEPS += "${@base_contains('DISTRO_FEATURES', 'x11', \
+	      'virtual/libx11 libxext libxxf86vm libxdamage libxfixes', '', d)}"
 
-DEPENDS = "makedepend-native python-native flex-native bison-native ${PROTO_DEPS} ${LIB_DEPS}"
+DEPENDS = "libxml2-native makedepend-native python-native flex-native bison-native ${LIB_DEPS}"
+DEPENDS += "${@base_contains('DISTRO_FEATURES', 'x11', '${PROTO_DEPS}', '', d)}"
 
-PROVIDES = "virtual/libgl"
+PROVIDES = "virtual/libgl virtual/libgles2"
 
 # for mesa-dri and mesa-xlib
 FILESEXTRAPATHS_append := "${THISDIR}/mesa:"
@@ -30,8 +32,8 @@ inherit autotools pkgconfig
 
 EXTRA_OECONF = "--enable-glu \
                 --disable-glw \
-                --disable-glut \
-                --enable-glx-tls"
+                --disable-glut"
+EXTRA_OECONF += "${@base_contains('DISTRO_FEATURES', 'x11', '--enable-glx-tls', '--disable-glx', d)}"
 
 # Multiple virtual/gl providers being built breaks staging
 EXCLUDE_FROM_WORLD = "1"
@@ -39,16 +41,20 @@ EXCLUDE_FROM_WORLD = "1"
 # ie mesa-dri could be empty and mesa-dri-dev RDEPENDS on it
 ALLOW_EMPTY_${PN} = "1"
 
-PACKAGES =+ "libegl libegl-dev libegl-dbg libglu libglu-dev libosmesa libosmesa-dev libgl libgl-dev"
+PACKAGES =+ "libegl libegl-dev libegl-dbg libglu libglu-dev libosmesa libosmesa-dev libgl libgl-dev libgles2 libgles2-dev libgbm libgbm-dev"
 FILES_libegl = "${libdir}/libEGL.so.* ${libdir}/egl/*.so"
 FILES_libgl = "${libdir}/libGL.so.*"
+FILES_libgles2 = "${libdir}/libGLESv2.so.*"
 FILES_libglu = "${libdir}/libGLU.so.*"
 FILES_libosmesa = "${libdir}/libOSMesa.so.*"
+FILES_libgbm = "${libdir}/libgbm.so.*"
 
-FILES_libegl-dev = "${libdir}/libEGL.* ${includedir}/EGL"
+FILES_libegl-dev = "${libdir}/libEGL.* ${includedir}/EGL ${includedir}/KHR"
 FILES_libgl-dev = "${libdir}/libGL.* ${includedir}/GL ${libdir}/pkgconfig/gl.pc"
+FILES_libgles2-dev = "${libdir}/libGLESv2.* ${includedir}/GLES2 ${libdir}/pkgconfig/glesv2.pc"
 FILES_libglu-dev = "${libdir}/libGLU.* ${includedir}/GL/glu*.h"
 FILES_libosmesa-dev = "${libdir}/libOSMesa.* ${includedir}/osmesa.h"
+FILES_libgbm-dev = "${libdir}/libgbm.* ${includedir}/gbm.h ${libdir}/pkgconfig/gbm.pc"
 
 FILES_${PN}-dbg += "${libdir}/dri/.debug/*"
 FILES_libegl-dbg += "${libdir}/egl/.debug/*"
