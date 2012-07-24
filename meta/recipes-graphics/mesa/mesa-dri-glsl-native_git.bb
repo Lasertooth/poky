@@ -1,23 +1,24 @@
 require mesa-dri-glsl-native.inc
 
-LIC_FILES_CHKSUM = "file://../../docs/license.html;md5=03ccdc4c379c4289aecfb8892c546f67"
+LIC_FILES_CHKSUM = "file://docs/license.html;md5=3297a8331ba66df8f0c0d7844f90645e"
 
-SRCREV = "c1f4867c89adb1a6b19d66ec8ad146115909f0a7"
-PV = "8.0.4+git${SRCPV}"
+SRCREV = "27382c0f7ba2ae826531ba4c254741b2a9df1882"
+PV = "8.1.0+git${SRCPV}"
 DEFAULT_PREFERENCE = "-1"
 
 SRC_URI = "git://anongit.freedesktop.org/git/mesa/mesa;protocol=git"
-S = "${WORKDIR}/git/src/glsl"
+S = "${WORKDIR}/git"
 
-inherit native
+# Let's compile a minimum EGL/NULL GLES2 without a single dri driver to get the
+# native utility that generates some C files.
+EXTRA_OECONF  = "--disable-glu --disable-glx --disable-gallium-egl --without-gallium-drivers"
+EXTRA_OECONF += "--disable-dri --enable-gles2"
+EXTRA_OECONF += "--enable-egl --with-egl-platforms=null"
 
-# use default config for native build
-do_configure_prepend() {
-	ln -sf ${S}/../../configs/default ${S}/../../configs/current
-}
+inherit native autotools
 
 do_install() {
 	install -d ${D}/${bindir}/glsl
-	install -m 755 ${S}/builtin_compiler ${D}/${bindir}/glsl/builtin_compiler
-	install -m 755 ${S}/glsl_compiler ${D}/${bindir}/glsl/glsl_compiler
+	install -m 755 ${S}/src/glsl/builtin_compiler ${D}/${bindir}/glsl/builtin_compiler
+	install -m 755 ${S}/src/glsl/glsl_compiler ${D}/${bindir}/glsl/glsl_compiler
 }
