@@ -1,6 +1,8 @@
 PROTO_DEPS += "dri2proto"
 LIB_DEPS += "libdrm expat udev"
 
+LIB_DEPS +="${@base_contains('DISTRO_FEATURES', 'wayland', 'wayland', '', d)}"
+
 # most of our targets do not have DRI so will use mesa-xlib
 DEFAULT_PREFERENCE = "-1"
 
@@ -10,6 +12,7 @@ DRIDRIVERS_append_x86-64 = ",i915,i965"
 
 EGL_PLATFORMS  = "drm"
 EGL_PLATFORMS .="${@base_contains('DISTRO_FEATURES', 'x11', ',x11', '', d)}"
+EGL_PLATFORMS .="${@base_contains('DISTRO_FEATURES', 'wayland', ',wayland', '', d)}"
 
 EXTRA_OECONF += "--disable-gallium --without-gallium-drivers"
 EXTRA_OECONF += "--enable-dri --with-dri-drivers=${DRIDRIVERS}"
