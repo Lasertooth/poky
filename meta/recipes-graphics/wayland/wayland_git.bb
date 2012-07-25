@@ -30,3 +30,11 @@ S = "${WORKDIR}/git"
 SRCREV = "2e79c4877fc4f402297e9d685b5eb2c41d7dd814"
 PV = "0.94.90+git${SRCPV}"
 PR = "r0"
+
+# wayland installs a m4 macro for other projects to use. This m4 macro
+# includes a path to a makefile fragment to get the rules to generate
+# stubs from protocol description files.
+do_install_append() {
+  sed -i -e '4,10s,prefix=.*$,prefix=${D}/${prefix},;4,10s,exec_prefix=,exec_prefix=${D}/${exec_prefix},' \
+    ${D}/${datadir}/aclocal/wayland-scanner.m4
+}
